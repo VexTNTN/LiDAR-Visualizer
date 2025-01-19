@@ -2,7 +2,8 @@
 import socket
 import struct
 import ctypes
-from struct import calcsize
+import random
+from time import sleep 
  
 s = socket.socket()         
 print ("Socket successfully created")
@@ -12,24 +13,26 @@ port = 12345
 s.bind(('', port))         
 print ("socket binded to %s" %(port)) 
 
-floatList = [(0, 36), (36, 36), (36, 0), (-36, 0), (-36, -36), (0, -36)]
  
 s.listen(5)     
 print ("socket is listening")            
  
 while True: 
-    # Establish connection with client.
     c, addr = s.accept()     
+    # Establish connection with client.
     print ('Got connection from', addr )
     
     c.send('Thank you for connecting'.encode()) 
 
     # buf = (ctypes.c_float * 2 * len(floatList))()
     # buf[:] = floatList
-    flattenedList = [item for sublist in floatList for item in sublist]
-    buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
-    print(calcsize(f'H{len(flattenedList)}e'))
-    c.send(buf)
+    for i in range(5):
+        floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(100)]
+        flattenedList = [item for sublist in floatList for item in sublist]
+        buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
+        print(struct.calcsize(f'H{len(flattenedList)}e'))
+        c.send(buf)
+        sleep(5)
 
     c.close()
     break
