@@ -79,32 +79,50 @@ def update_data():
            
 
 
+
 dpg.create_context()
-with dpg.window(label='Tutorial', tag='',width=850, height=640, no_title_bar=True):
+
+width, height, channels, data = dpg.load_image("H2H.png")
+
+with dpg.texture_registry(show=False):
+    dpg.add_static_texture(width, height, default_value=data, tag="H2H")
+
+with dpg.window(label='Tutorial', tag='Primary',width=1000, height=1000, no_title_bar=True):
+    # dpg.add_image("H2H", width=1000, height=1000)
 
     with dpg.plot(label='Line Series', height=-1, width=-1):
         # optionally create legend
         # dpg.add_plot_legend()
 
         # REQUIRED: create x and y axes, set to auto scale.
-        x_axis = dpg.add_plot_axis(dpg.mvXAxis, label='x', tag='x_axis')
+        with dpg.plot_axis(dpg.mvXAxis, label='x', tag='x_axis'):
+            dpg.add_image_series("H2H", [-74, -74], [74, 74])
         y_axis = dpg.add_plot_axis(dpg.mvYAxis, label='y', tag='y_axis')
-
 
         # series belong to a y axis. Note the tag name is used in the update
         # function update_data
         dpg.add_scatter_series(x=list((0,)),y=list((0,)), 
                             label='Temp', parent='y_axis', 
                             tag='series_tag')
-        dpg.set_axis_limits('x_axis', -72, 72)
-        dpg.set_axis_limits('y_axis', -72, 72)
+        dpg.set_axis_limits('x_axis', -74, 74)
+        dpg.set_axis_limits('y_axis', -74, 74)
+        dpg.set_axis_ticks('x_axis', tuple((str(i), i) for i in range(-72, 73, 12)))
+        dpg.set_axis_ticks('y_axis', tuple((str(i), i) for i in range(-72, 73, 12)))
         
-            
+        
+def resize():
+    # keep the aspect ratio of the dpg window a square
+    width = dpg.get_viewport_width()
+    height = dpg.get_viewport_height()
+    dpg.set_viewport_height(min(width, height))
+    dpg.set_viewport_width(min(width, height))
                             
-dpg.create_viewport(title='Custom Title', width=850, height=640)
+dpg.create_viewport(title='Custom Title', width=1000, height=1000, resizable=True)
+dpg.set_viewport_resize_callback(resize)
 
 dpg.setup_dearpygui()
 dpg.show_viewport()
+dpg.set_primary_window('Primary', True)
 
 thread = threading.Thread(target=update_data)
 thread.start()

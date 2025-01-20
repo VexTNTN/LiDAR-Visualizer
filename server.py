@@ -30,19 +30,20 @@ while True:
     shift = 0
     dir = 1
     while True:
-        interval = np.arange(-10, 10, 0.04) + shift
-        sinData = np.sin(interval) * 50
-        sinData = [(x, y) for x, y in zip(interval, sinData)]
+        # interval = np.arange(-10, 10, 0.04) + shift
+        # sinData = np.sin(interval) * 50
+        # sinData = [(x, y) for x, y in zip(interval, sinData)]
 
-        # floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
-        flattenedList = [item for sublist in sinData for item in sublist]
+        floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
+        flattenedList = [item for sublist in floatList for item in sublist]
         buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
         # print(struct.calcsize(f'H{len(flattenedList)}e'))
-        c.send(buf)
-        shift += 0.1 * dir
-        if shift > 50 or shift < -50:
-            dir *= -1
+        try:
+            c.send(buf)
+        except:
+            print('Connection closed')
+            break
+        # shift += 0.1 * dir
+        # if shift > 50 or shift < -50:
+        #     dir *= -1
         # sleep(1/60.0)
-
-    c.close()
-    break
