@@ -69,7 +69,10 @@ def update_data():
 
         #set the series x and y to the last nsamples
         dpg.set_value('series_tag', [[coord[0] for coord in fakeData], [coord[1] for coord in fakeData]])          
-        print(iters / (time.time() - startTime))
+        try:
+            print(iters / (time.time() - startTime))
+        except:
+            pass
         # time.sleep(1/60.0)
         sample=sample+1
         iters += 1
@@ -77,11 +80,11 @@ def update_data():
 
 
 dpg.create_context()
-with dpg.window(label='Tutorial', tag='win',width=800, height=600):
+with dpg.window(label='Tutorial', tag='',width=850, height=640, no_title_bar=True):
 
     with dpg.plot(label='Line Series', height=-1, width=-1):
         # optionally create legend
-        dpg.add_plot_legend()
+        # dpg.add_plot_legend()
 
         # REQUIRED: create x and y axes, set to auto scale.
         x_axis = dpg.add_plot_axis(dpg.mvXAxis, label='x', tag='x_axis')
