@@ -26,13 +26,13 @@ while True:
 
     # buf = (ctypes.c_float * 2 * len(floatList))()
     # buf[:] = floatList
-    for i in range(5):
-        floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(100)]
+    for i in range(50):
+        floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
         flattenedList = [item for sublist in floatList for item in sublist]
         buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
         print(struct.calcsize(f'H{len(flattenedList)}e'))
         c.send(buf)
-        sleep(5)
+        sleep(0.1)
 
     c.close()
     break
