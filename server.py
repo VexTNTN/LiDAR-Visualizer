@@ -3,6 +3,7 @@ import socket
 import struct
 import ctypes
 import random
+import numpy as np
 from time import sleep 
  
 s = socket.socket()         
@@ -26,13 +27,22 @@ while True:
 
     # buf = (ctypes.c_float * 2 * len(floatList))()
     # buf[:] = floatList
-    for i in range(50):
-        floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
-        flattenedList = [item for sublist in floatList for item in sublist]
+    shift = 0
+    dir = 1
+    while True:
+        interval = np.arange(-10, 10, 0.04) + shift
+        sinData = np.sin(interval) * 50
+        sinData = [(x, y) for x, y in zip(interval, sinData)]
+
+        # floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
+        flattenedList = [item for sublist in sinData for item in sublist]
         buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
-        print(struct.calcsize(f'H{len(flattenedList)}e'))
+        # print(struct.calcsize(f'H{len(flattenedList)}e'))
         c.send(buf)
-        sleep(0.1)
+        shift += 0.1 * dir
+        if shift > 50 or shift < -50:
+            dir *= -1
+        # sleep(1/60.0)
 
     c.close()
     break
