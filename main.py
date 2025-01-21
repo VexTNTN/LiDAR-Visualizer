@@ -28,6 +28,7 @@ print(s.recv(1024).decode())
 # data_x = [0.0] * nsamples
 
 is_logging = False
+log_file = None
 
 def get_packet() -> list[tuple[float, float]]:
     """
@@ -49,11 +50,9 @@ def get_packet() -> list[tuple[float, float]]:
             packet_items = struct.unpack('H', size_prefix)[0]
             packet = s.recv(packet_items * 2)
             # logs the data to a file if the recording button is pressed
-            if is_logging:
+            if is_logging and log_file:
                 # open the file in append and binary mode, then write the packet straight from the socket
-                with open('log.bin', 'ab') as f:
-                    f.write(packet)
-                f.close()
+                log_file.write(packet)
             # unpack the packet into a list of floats [x, y, x, y, ...]
             float_list = struct.unpack(f'{packet_items}e', packet)
 
@@ -102,15 +101,19 @@ def log_data():
     Otherwise, it changes the label to 'Stop Recording', sets `is_logging` to True, clears the contents of 'log.bin',
     and prints a message indicating that logging has started.
     """
-    global is_logging
+    global is_logging, log_file
     if dpg.get_item_label('logging') == 'Stop Recording':
         dpg.set_item_label('logging', 'Start Recording')
         is_logging = False
+        if log_file:
+            log_file.close()
+            log_file = None
         print('Stopped logging data')
     else:
         dpg.set_item_label('logging', 'Stop Recording')
         is_logging = True
         open('log.bin', 'w').close()
+        log_file = open('log.bin', 'ab')
         print('Logging data')
 
 
