@@ -37,7 +37,7 @@ while True:
 
         # floatList = [(random.uniform(-72, 72), random.uniform(-72, 72)) for _ in range(500)]
         flattenedList = [item for sublist in sinData for item in sublist]
-        buf = struct.pack(f'H{len(flattenedList)}e', len(flattenedList), *flattenedList)
+        buf = struct.pack(f'!H{len(flattenedList)}e', len(flattenedList), *flattenedList)
         # print(struct.calcsize(f'H{len(flattenedList)}e'))
         try:
             c.send(buf)
@@ -47,4 +47,4 @@ while True:
         shift += 0.1 * dir
         if shift > 50 or shift < -50:
             dir *= -1
-        # sleep(1/60.0)
+        sleep(1/75.0)

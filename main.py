@@ -12,7 +12,7 @@ s = socket.socket()
 
 port = 12345
 # connect to the server on local computer
-s.connect(('127.0.0.1', port))
+s.connect(('raspberrypi.local', port))
 print(s.recv(1024).decode())
 
 # global data_y
@@ -28,7 +28,17 @@ print(s.recv(1024).decode())
 # data_x = [0.0] * nsamples
 
 is_logging = False
-log_file = None
+log_file = None 
+
+def recvall(sock, n):
+    # Helper function to recv n bytes or return None if EOF is hit
+    data = bytearray()
+    while len(data) < n:
+        packet = sock.recv(n - len(data))
+        if not packet:
+            return None
+        data.extend(packet)
+    return data
 
 def get_packet() -> list[tuple[float, float]]:
     """
@@ -39,26 +49,26 @@ def get_packet() -> list[tuple[float, float]]:
         extracted from the packet. Returns an empty list if no packet 
         is received within 0.5 seconds.
     """
-
     startTime = time.time()
     while True:
         if (time.time() - startTime) > 0.5:
             return []
-        size_prefix = s.recv(2)
-        if size_prefix:
-            # get the number of items in the packet as an unsigned short (2 bytes)
-            packet_items = struct.unpack('H', size_prefix)[0]
-            packet = s.recv(packet_items * 2)
-            # logs the data to a file if the recording button is pressed
-            if is_logging and log_file:
-                # open the file in append and binary mode, then write the packet straight from the socket
-                log_file.write(packet)
-            # unpack the packet into a list of floats [x, y, x, y, ...]
-            float_list = struct.unpack(f'{packet_items}e', packet)
+        # get the size of the packet as an unsigned short (2 bytes)
+        size_prefix = recvall(s, 2)
+        if not size_prefix:
+            return []
+        packet_items = struct.unpack('!H', size_prefix)[0]
+        packet = recvall(s, packet_items * 2)
+        # logs the data to a file if the recording button is pressed
+        if is_logging and log_file:
+            # open the file in append and binary mode, then write the packet straight from the socket
+            log_file.write(packet)
+        # unpack the packet into a list of floats [x, y, x, y, ...]
+        float_list = struct.unpack(f'!{packet_items}e', packet)
 
-            coordinates = [(float_list[i], float_list[i + 1])
-                           for i in range(0, len(float_list), 2)]
-            return coordinates
+        coordinates = [(float_list[i], float_list[i + 1])
+                        for i in range(0, len(float_list), 2)]
+        return coordinates
 
 
 def update_data():
@@ -132,7 +142,7 @@ with dpg.window(label='Tutorial', tag='Primary', width=1000, height=1000, no_tit
     dpg.add_same_line()
     dpg.add_text(tag='fps', default_value='0')
 
-    with dpg.plot(label='Line Series', height=-1, width=-1):
+    with dpg.plot(label='Field', tag='Field', height=1000, width=1000):
         # optionally create legend
         # dpg.add_plot_legend()
 
@@ -157,10 +167,11 @@ with dpg.window(label='Tutorial', tag='Primary', width=1000, height=1000, no_tit
 
 def resize():
     # keep the aspect ratio of the dpg window a square
-    width = dpg.get_viewport_width()
-    height = dpg.get_viewport_height()
-    dpg.set_viewport_height(min(width, height))
-    dpg.set_viewport_width(min(width, height))
+    size = min(dpg.get_viewport_height(), dpg.get_viewport_width())
+    dpg.set_viewport_width(size)
+    dpg.set_viewport_height(size + 50)
+    dpg.set_item_width('Field', size - 30)
+    dpg.set_item_height('Field', size - 30)
 
 
 dpg.create_viewport(title='Custom Title', width=1000,

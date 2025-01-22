@@ -19,9 +19,9 @@ print(s.recv(1024).decode())
 while True:
     size_prefix = s.recv(2)
     if size_prefix:
-        packet_items = struct.unpack('H', size_prefix)[0]
+        packet_items = struct.unpack('!H', size_prefix)[0]
         print(packet_items)
-        float_list = struct.unpack(f'{packet_items}e', s.recv(packet_items * 2))
+        float_list = struct.unpack(f'!{packet_items}e', s.recv(packet_items * 2))
 
         coordinates = [(float_list[i], float_list[i + 1]) for i in range(0, len(float_list), 2)]
         print('Received tuple list:', coordinates)
