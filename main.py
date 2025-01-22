@@ -1,18 +1,15 @@
 import dearpygui.dearpygui as dpg
-import math
 import time
-import collections
 import threading
-import pdb
 import socket
 import struct
-import base64
 
 s = socket.socket()
 
 port = 12345
 # connect to the server on local computer
-s.connect(('raspberrypi.local', port))
+s.connect(('127.0.0.1', port))
+#s.connect(('raspberrypi.local', port))
 print(s.recv(1024).decode())
 
 # global data_y
@@ -59,6 +56,8 @@ def get_packet() -> list[tuple[float, float]]:
             return []
         packet_items = struct.unpack('!H', size_prefix)[0]
         packet = recvall(s, packet_items * 2)
+        if not packet:
+            return []
         # logs the data to a file if the recording button is pressed
         if is_logging and log_file:
             # open the file in append and binary mode, then write the packet straight from the socket
@@ -136,11 +135,10 @@ with dpg.texture_registry(show=False):
 
 with dpg.window(label='Tutorial', tag='Primary', width=1000, height=1000, no_title_bar=True):
     # dpg.add_image("H2H", width=1000, height=1000)
-    dpg.add_button(label='Start Recording', tag='logging', callback=log_data)
-    dpg.add_same_line()
-    dpg.add_text(tag='fps_label', default_value='FPS: ')
-    dpg.add_same_line()
-    dpg.add_text(tag='fps', default_value='0')
+    with dpg.group(horizontal=True):
+        dpg.add_button(label='Start Recording', tag='logging', callback=log_data)
+        dpg.add_text(tag='fps_label', default_value='FPS: ')
+        dpg.add_text(tag='fps', default_value='0')
 
     with dpg.plot(label='Field', tag='Field', height=1000, width=1000):
         # optionally create legend
