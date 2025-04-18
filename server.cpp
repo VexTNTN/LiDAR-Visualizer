@@ -104,7 +104,7 @@ int main() {
                   floats.size() * sizeof(float));
 
       /* send ---------------------------------------------------------- */
-      std::cout << sizeof(packet) << std::endl;
+      std::cout << packet.size() << std::endl;
       if (!send_all(cfd, packet)) {
         std::cout << "Connection closed\n";
         break;

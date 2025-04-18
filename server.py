@@ -24,7 +24,7 @@ while True:
     print ('Got connection from', addr )
     
     # Initial handshake communication with the client -- Delete at some point
-    c.send('Thank you for connecting'.encode()) 
+    # c.send('Thank you for connecting'.encode()) 
 
     # buf = (ctypes.c_float * 2 * len(floatList))()
     # buf[:] = floatList

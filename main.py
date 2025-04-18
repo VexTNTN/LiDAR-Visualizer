@@ -55,7 +55,7 @@ def get_packet() -> list[tuple[float, float]]:
         if not size_prefix:
             return []
         packet_items = struct.unpack('!H', size_prefix)[0]
-        packet = recvall(s, packet_items * 2)
+        packet = recvall(s, packet_items * 4)
         if not packet:
             return []
         # logs the data to a file if the recording button is pressed
@@ -63,8 +63,8 @@ def get_packet() -> list[tuple[float, float]]:
             # open the file in append and binary mode, then write the packet straight from the socket
             log_file.write(packet)
         # unpack the packet into a list of floats [x, y, x, y, ...]
-        float_list = struct.unpack(f'!{packet_items}e', packet)
-        print(len(float_list))
+        float_list = struct.unpack(f'!{packet_items}f', packet)
+        # print(len(float_list))
 
         coordinates = [(float_list[i], float_list[i + 1])
                         for i in range(0, len(float_list), 2)]
@@ -98,7 +98,7 @@ def update_data():
 
         # Delay to keep the framerate at a certain value, but it wont be exaclty that value
         # because of the time it takes to process the data
-        time.sleep(1/500.0)
+        time.sleep(1/100.0)
         sample = sample+1
         iters += 1
 
