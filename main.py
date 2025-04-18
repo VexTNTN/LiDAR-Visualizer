@@ -10,7 +10,7 @@ port = 12345
 # connect to the server on local computer
 s.connect(('127.0.0.1', port))
 #s.connect(('raspberrypi.local', port))
-print(s.recv(1024).decode())
+#print(s.recv(1024).decode())
 
 # global data_y
 # global data_x
@@ -64,6 +64,7 @@ def get_packet() -> list[tuple[float, float]]:
             log_file.write(packet)
         # unpack the packet into a list of floats [x, y, x, y, ...]
         float_list = struct.unpack(f'!{packet_items}e', packet)
+        print(len(float_list))
 
         coordinates = [(float_list[i], float_list[i + 1])
                         for i in range(0, len(float_list), 2)]

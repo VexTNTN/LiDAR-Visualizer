@@ -15,7 +15,7 @@ s.connect(('127.0.0.1', port))
 coordinates = []
  
 # Initial handshake communication with the server -- Delete at some point
-print(s.recv(1024).decode())
+
 while True:
     size_prefix = s.recv(2)
     if size_prefix:
