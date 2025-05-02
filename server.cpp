@@ -12,12 +12,12 @@
 
 namespace {
 constexpr uint16_t PORT = 12345;
-constexpr double STEP = 0.04; // −10 … +10 with this step ⇒ 500 samples
+constexpr double STEP = 0.04;
 constexpr double X_START = -10.0;
 constexpr double X_END = 10.0;
 constexpr double MAX_SHIFT = 50.0;
 constexpr double SHIFT_SPEED = 0.1;
-constexpr int FPS = 75; // 1/75 s between frames
+constexpr int FPS = 60; // 1/75 s between frames
 
 // Send all bytes in buf; return false on error/EOF.
 bool send_all(int fd, const std::vector<std::uint8_t> &buf) {
@@ -84,27 +84,30 @@ int main() {
     int dir = 1;
     while (true) {
       /* build payload ------------------------------------------------- */
-      std::vector<float> floats;
-      floats.reserve(1000); // 500 points × 2
+      std::vector<short> shorts;
+      shorts.reserve(1000); // 500 points × 2
 
       for (double x = X_START; x < X_END; x += STEP) {
-        float xf = static_cast<float>(x + shift);
-        float yf = static_cast<float>(std::sin(xf) * 50.0);
-        floats.push_back(xf);
-        floats.push_back(yf);
+        double xd = (x + shift);
+        double yd = (std::sin(xd) * 50.0);
+        short xs = floor(xd * 32767 / 72);
+        short ys = floor(yd * 32767 / 72);
+        std::cout << xs << std::endl;
+        std::cout << ys << std::endl;
+        shorts.push_back(xs);
+        shorts.push_back(ys);
       }
 
-      uint16_t count = static_cast<uint16_t>(floats.size());
+      uint16_t count = static_cast<uint16_t>(shorts.size());
       uint16_t count_be = htons(count); // network order
       std::vector<std::uint8_t> packet(sizeof(count_be) +
-                                       count * sizeof(float));
+                                       count * sizeof(short));
       // copy header + payload
       std::memcpy(packet.data(), &count_be, sizeof(count_be));
-      std::memcpy(packet.data() + sizeof(count_be), floats.data(),
-                  floats.size() * sizeof(float));
+      std::memcpy(packet.data() + sizeof(count_be), shorts.data(),
+                  shorts.size() * sizeof(short));
 
       /* send ---------------------------------------------------------- */
-      std::cout << packet.size() << std::endl;
       if (!send_all(cfd, packet)) {
         std::cout << "Connection closed\n";
         break;

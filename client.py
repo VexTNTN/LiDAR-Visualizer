@@ -31,15 +31,14 @@ while True:
     size_prefix = s.recv(2)
     if size_prefix:
         packet_items = struct.unpack('!H', size_prefix)[0]
-        packet = recvall(s, packet_items * 4)
+        packet = recvall(s, packet_items * 2)
         if not packet:
             break
         print(packet_items)
         print(len(packet))
-        float_list = struct.unpack(f'!{packet_items}f', packet)
+        short_list = struct.unpack(f'<{packet_items}h', packet)
+        coordinates = [(short_list[i] * 72/32767, short_list[i + 1] * 72/32767) for i in range(0, len(short_list), 2)]
 
-        coordinates = [(float_list[i], float_list[i + 1]) for i in range(0, len(float_list), 2)]
-        print('Received tuple list:', coordinates)
 
 
 
